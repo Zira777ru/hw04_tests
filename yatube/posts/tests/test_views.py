@@ -1,4 +1,3 @@
-from urllib import response
 from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
@@ -138,6 +137,7 @@ class PostPagesTests(TestCase):
             reverse('posts:group_list', kwargs={'slug': other_group.slug}))
         context_object = response.context['page_obj'].object_list
         self.assertNotIn(self.post, context_object)
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod
