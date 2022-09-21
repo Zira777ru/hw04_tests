@@ -41,14 +41,15 @@ class PostCreateFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        new_post = Post.objects.exclude(
-            id__contains=old_posts).values('text', 'group')
+        new_posts = Post.objects.exclude(
+            id__contains=old_posts).values('text', 'group', 'author')
         self.assertRedirects(response, reverse('posts:profile', kwargs={
             'username': self.author}))
         self.assertEqual(Post.objects.count(), post_count + 1)
-        self.assertEqual(new_post.count(), 1)
-        self.assertEqual(new_post[0]['text'], form_data['text'])
-        self.assertEqual(new_post[0]['group'], form_data['group'])
+        self.assertEqual(new_posts.count(), 1)
+        self.assertEqual(new_posts[0]['text'], form_data['text'])
+        self.assertEqual(new_posts[0]['group'], form_data['group'])
+        self.assertEqual(new_posts[0]['author'], self.author.pk)
 
     def test_edit_post(self):
         """Валидная форма перезаписывает запись."""

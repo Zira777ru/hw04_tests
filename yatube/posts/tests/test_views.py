@@ -1,3 +1,4 @@
+from urllib import response
 from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
@@ -48,28 +49,31 @@ class PostPagesTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_index_page_show_correct_context(self):
+        """Шаблон index сформирован с правильным контекстом."""
         response = self.authorized_author.get(
             reverse('posts:index'))
         context_object = response.context['page_obj'].object_list
-        query = Post.objects.all()
-        self.assertQuerysetEqual(context_object, query, transform=lambda x: x)
+        posts = Post.objects.all()
+        self.assertQuerysetEqual(context_object, posts, transform=lambda x: x)
 
     def test_group_list_page_show_correct_context(self):
+        """Шаблон group_list сформирован с правильным контекстом."""
         response = self.authorized_author.get(
             reverse('posts:group_list', kwargs={'slug': self.group.slug}))
         context_object = response.context['page_obj'].object_list
-        query = Post.objects.filter(group=self.group)
+        posts = Post.objects.filter(group=self.group)
         context_group = response.context['group']
-        self.assertQuerysetEqual(context_object, query, transform=lambda x: x)
+        self.assertQuerysetEqual(context_object, posts, transform=lambda x: x)
         self.assertEqual(context_group, self.group)
 
     def test_profile_page_show_correct_context(self):
+        """Шаблон profile_page сформирован с правильным контекстом."""
         response = self.authorized_author.get(
             reverse('posts:profile', kwargs={'username': self.post.author}))
         context_object = response.context['page_obj'].object_list
-        query = Post.objects.filter(author=self.author)
+        posts = Post.objects.filter(author=self.author)
         context_profile = response.context['profile']
-        self.assertQuerysetEqual(context_object, query, transform=lambda x: x)
+        self.assertQuerysetEqual(context_object, posts, transform=lambda x: x)
         self.assertEqual(context_profile, self.author)
 
     def test_post_detail_page_show_correct_context(self):
@@ -130,8 +134,10 @@ class PostPagesTests(TestCase):
             slug='other-slug',
             description='Другое описание',
         )
-        self.assertNotEqual(other_group.id, self.post.group.id)
-
+        response = self.authorized_author.get(
+            reverse('posts:group_list', kwargs={'slug': other_group.slug}))
+        context_object = response.context['page_obj'].object_list
+        self.assertNotIn(self.post, context_object)
 
 class PaginatorViewsTest(TestCase):
     @classmethod
